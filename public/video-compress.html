@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Compress - Reform Lab</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar" data-nav>
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-brand" data-nav-home>
+        <img src="assets/reform-lab-logo-dark.svg" alt="Reform Lab" class="brand-logo brand-logo-theme-dark" height="32" decoding="async" />
+        <img src="assets/reform-lab-logo-light.svg" alt="" class="brand-logo brand-logo-theme-light" aria-hidden="true" height="32" decoding="async" />
+        <span class="brand-text">Reform Lab</span>
+      </a>
+
+      <div class="navbar-links">
+        <ul class="nav-categories" data-nav-categories></ul>
+      </div>
+
+      <div class="navbar-actions">
+        <button class="nav-search-action" type="button" data-nav-search-trigger>
+          <span class="nav-search-icon" aria-hidden="true"></span>
+          <span>Buscar</span>
+          <span class="nav-search-shortcut">Ctrl + K</span>
+        </button>
+        <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
+          <span class="theme-icon sun" aria-hidden="true"></span>
+          <span class="theme-icon moon" aria-hidden="true"></span>
+        </button>
+        <button class="nav-mobile-toggle" type="button" data-nav-mobile-trigger aria-label="Abrir menú">
+          <span class="nav-mobile-toggle-box" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+          <span class="sr-only">Abrir menú</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-drawer" hidden data-nav-drawer>
+    <div class="mobile-drawer-backdrop" data-nav-drawer-dismiss></div>
+    <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <header class="drawer-header">
+        <h2 class="drawer-title" id="drawerTitle">Herramientas</h2>
+        <button class="drawer-close" type="button" data-nav-drawer-dismiss aria-label="Cerrar menú">×</button>
+      </header>
+      <div class="drawer-content" data-nav-drawer-content></div>
+    </div>
+  </div>
+
+  <div class="search-overlay" hidden data-nav-search>
+    <div class="search-overlay-backdrop" data-nav-search-dismiss></div>
+    <div class="search-overlay-panel" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+      <header class="search-overlay-header">
+        <h2 class="search-overlay-title" id="searchTitle">Buscar herramienta</h2>
+        <button class="search-overlay-close" type="button" data-nav-search-dismiss aria-label="Cerrar búsqueda">×</button>
+      </header>
+      <div class="search-input-wrapper">
+        <input type="search" class="search-input" placeholder="Escribe para filtrar herramientas" data-nav-search-input aria-label="Buscar herramienta" />
+      </div>
+      <div class="search-results" data-nav-search-results>
+        <p class="search-result-empty">Empieza a escribir para ver resultados.</p>
+      </div>
+      <p class="search-hint">Pulsa Esc para cerrar.</p>
+    </div>
+  </div>
+
+  <div class="background"></div>
+
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Video Compress</h1>
+      <p class="subtitle">Reduce el tamaño de tus videos manteniendo buena calidad</p>
+    </header>
+
+    <main class="main">
+      <div class="dropzone" id="dropzone">
+        <div class="dropzone-content">
+          <svg class="icon-upload" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <p class="dropzone-text">Arrastra videos aquí o haz clic para seleccionar</p>
+          <p class="dropzone-hint">MP4, MOV, WEBM, MKV, AVI</p>
+        </div>
+        <input type="file" id="fileInput" multiple accept=".mp4,.mov,.webm,.mkv,.avi,video/*" hidden>
+      </div>
+
+      <section class="compression-controls" id="compressionControls" style="display:none">
+        <div class="compression-header">
+          <h2>Ajusta el nivel de compresión</h2>
+          <p>Selecciona el equilibrio entre peso final y calidad (CRF).</p>
+        </div>
+        <div class="quality-options">
+          <button class="quality-option active" type="button" data-crf="23">
+            <span class="quality-title">Equilibrado</span>
+            <span class="quality-desc">CRF 23</span>
+          </button>
+          <button class="quality-option" type="button" data-crf="28">
+            <span class="quality-title">Ligero</span>
+            <span class="quality-desc">CRF 28</span>
+          </button>
+          <button class="quality-option" type="button" data-crf="20">
+            <span class="quality-title">Alta calidad</span>
+            <span class="quality-desc">CRF 20</span>
+          </button>
+        </div>
+      </section>
+
+      <div class="files-container" id="filesContainer"></div>
+
+      <button class="btn-convert" id="compressBtn" disabled>
+        <span>Comprimir video</span>
+      </button>
+    </main>
+
+    <footer class="footer">
+      <p>Compresión de video (próximamente)</p>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module" src="navigation.js"></script>
+  <script type="module" src="video-compress.js"></script>
+</body>
+</html>

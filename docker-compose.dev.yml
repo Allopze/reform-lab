@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  simplepdf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simplepdf-dev
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - MAX_FILE_MB=50
+      - MAX_FILES=10
+      - NODE_ENV=development
+      - ALLOWED_EXT=doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp
+      - ALLOWED_IMG_EXT=jpg,jpeg,png,gif,webp,tiff,tif,bmp,ico,svg
+    volumes:
+      # Montar código fuente para hot-reload
+      - ./public:/app/public
+      - ./server.js:/app/server.js
+      - ./pdf2docx_converter.py:/app/pdf2docx_converter.py
+      - /app/node_modules
+      - pdf_tmp:/app/tmp
+    restart: unless-stopped
+    command: npm run watch
+    networks:
+      - simplepdf-network
+
+volumes:
+  pdf_tmp:
+    driver: local
+
+networks:
+  simplepdf-network:
+    driver: bridge

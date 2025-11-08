@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de QR - Reform Lab</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <script>
+    (function() {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) { /* no-op */ }
+    })();
+  </script>
+</head>
+<body>
+  <nav class="navbar" data-nav>
+    <div class="navbar-container">
+      <a href="index.html" class="navbar-brand" data-nav-home>
+        <img src="assets/reform-lab-logo-dark.svg" alt="Reform Lab" class="brand-logo brand-logo-theme-dark" height="32" decoding="async" />
+        <img src="assets/reform-lab-logo-light.svg" alt="" class="brand-logo brand-logo-theme-light" aria-hidden="true" height="32" decoding="async" />
+        <span class="brand-text">Reform Lab</span>
+      </a>
+
+      <div class="navbar-links">
+        <ul class="nav-categories" data-nav-categories></ul>
+      </div>
+
+      <div class="navbar-actions">
+        <button class="nav-search-action" type="button" data-nav-search-trigger>
+          <span class="nav-search-icon" aria-hidden="true"></span>
+          <span>Buscar</span>
+          <span class="nav-search-shortcut">Ctrl + K</span>
+        </button>
+        <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
+          <span class="theme-icon sun" aria-hidden="true"></span>
+          <span class="theme-icon moon" aria-hidden="true"></span>
+        </button>
+        <button class="nav-mobile-toggle" type="button" data-nav-mobile-trigger aria-label="Abrir menú">
+          <span class="nav-mobile-toggle-box" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+          <span class="sr-only">Abrir menú</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-drawer" hidden data-nav-drawer>
+    <div class="mobile-drawer-backdrop" data-nav-drawer-dismiss></div>
+    <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <header class="drawer-header">
+        <h2 class="drawer-title" id="drawerTitle">Herramientas</h2>
+        <button class="drawer-close" type="button" data-nav-drawer-dismiss aria-label="Cerrar menú">×</button>
+      </header>
+      <div class="drawer-content" data-nav-drawer-content></div>
+    </div>
+  </div>
+
+  <div class="search-overlay" hidden data-nav-search>
+    <div class="search-overlay-backdrop" data-nav-search-dismiss></div>
+    <div class="search-overlay-panel" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+      <header class="search-overlay-header">
+        <h2 class="search-overlay-title" id="searchTitle">Buscar herramienta</h2>
+        <button class="search-overlay-close" type="button" data-nav-search-dismiss aria-label="Cerrar búsqueda">×</button>
+      </header>
+      <div class="search-input-wrapper">
+        <input type="search" class="search-input" placeholder="Escribe para filtrar herramientas" data-nav-search-input aria-label="Buscar herramienta" />
+      </div>
+      <div class="search-results" data-nav-search-results>
+        <p class="search-result-empty">Empieza a escribir para ver resultados.</p>
+      </div>
+      <p class="search-hint">Pulsa Esc para cerrar.</p>
+    </div>
+  </div>
+
+  <div class="background"></div>
+
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Generador de Códigos QR</h1>
+      <p class="subtitle">Arrastra texto, URLs o archivos para generar códigos QR al instante</p>
+    </header>
+
+    <main class="main">
+      <!-- Dropzone principal -->
+      <div class="dropzone" id="dropzone">
+        <div class="dropzone-content">
+          <svg class="icon-upload" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="6" height="6" rx="1"></rect>
+            <rect x="15" y="3" width="6" height="6" rx="1"></rect>
+            <rect x="3" y="15" width="6" height="6" rx="1"></rect>
+            <rect x="15" y="15" width="6" height="6" rx="1"></rect>
+            <line x1="10" y1="6" x2="14" y2="6"></line>
+            <line x1="10" y1="18" x2="14" y2="18"></line>
+            <line x1="6" y1="10" x2="6" y2="14"></line>
+            <line x1="18" y1="10" x2="18" y2="14"></line>
+          </svg>
+          <p class="dropzone-text">Pega texto, arrastra archivos o haz clic para seleccionar</p>
+          <p class="dropzone-hint">URLs, texto, emails, PDFs, imágenes, MP3</p>
+        </div>
+        <input type="file" id="fileInput" accept=".pdf,.mp3,.jpg,.jpeg,.png,.gif,.webp,.bmp,image/*,audio/*,application/pdf" hidden>
+        <textarea id="textInput" style="position: absolute; left: -9999px; width: 1px; height: 1px;"></textarea>
+      </div>
+
+      <!-- Opciones compactas -->
+      <div class="format-selector" id="optionsSelector" style="display: none;">
+        <div class="format-header">
+          <h3>Personalización</h3>
+          <div class="quality-buttons" id="qrFormatButtons">
+            <button class="quality-option active" data-format="png">PNG</button>
+            <button class="quality-option" data-format="svg">SVG</button>
+          </div>
+        </div>
+        <div class="qr-options-grid">
+          <div class="quality-control">
+            <label for="qrSize">Tamaño: <span id="qrSizeValue">300</span>px</label>
+            <input type="range" id="qrSize" min="100" max="1000" step="50" value="300" class="quality-slider">
+          </div>
+          <div>
+            <label class="control-label" for="qrColor">Color QR</label>
+            <input type="color" id="qrColor" value="#000000" class="color-input">
+          </div>
+          <div>
+            <label class="control-label" for="qrBackground">Fondo</label>
+            <input type="color" id="qrBackground" value="#ffffff" class="color-input">
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón de generar -->
+      <button class="btn-convert" id="generateBtn" style="display: none;">
+        <span>Generar Código QR</span>
+      </button>
+
+      <!-- Previsualización -->
+      <div id="qrResult" style="display: none;">
+        <div id="qrCanvasWrapper" style="display:none; text-align: center; margin-top: 2rem;">
+          <canvas id="qrCanvas" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></canvas>
+        </div>
+        <div id="qrSvgWrapper" style="display:none; text-align:center; margin-top: 2rem;">
+          <div id="qrSvgContainer" style="display:inline-block; max-width:100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+        </div>
+        <div id="qrActions" style="display:none; margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <button class="btn-convert" id="downloadBtn">
+            <span id="downloadBtnLabel">Descargar PNG</span>
+          </button>
+          <button class="btn-remove" id="clearBtn">
+            Nuevo QR
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <p>Genera códigos QR personalizados para diversos tipos de contenido</p>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script type="module" src="navigation.js"></script>
+  <script type="module" src="qr-generator.js"></script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Reform Audio - Reform Lab</title>
+	<link rel="stylesheet" href="styles.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+	<meta name="description" content="Suite de utilidades de audio (exploración)">
+</head>
+<body>
+	<nav class="navbar" data-nav>
+		<div class="navbar-container">
+			<a href="index.html" class="navbar-brand" data-nav-home>
+				<img src="assets/reform-lab-logo-dark.svg" alt="Reform Lab" class="brand-logo brand-logo-theme-dark" height="32" decoding="async" />
+				<img src="assets/reform-lab-logo-light.svg" alt="" class="brand-logo brand-logo-theme-light" aria-hidden="true" height="32" decoding="async" />
+				<span class="brand-text">Reform Lab</span>
+			</a>
+
+			<div class="navbar-links">
+				<ul class="nav-categories" data-nav-categories></ul>
+			</div>
+
+			<div class="navbar-actions">
+				<button class="nav-search-action" type="button" data-nav-search-trigger>
+					<span class="nav-search-icon" aria-hidden="true"></span>
+					<span>Buscar</span>
+					<span class="nav-search-shortcut">Ctrl + K</span>
+				</button>
+				<button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
+					<span class="theme-icon sun" aria-hidden="true"></span>
+					<span class="theme-icon moon" aria-hidden="true"></span>
+				</button>
+				<button class="nav-mobile-toggle" type="button" data-nav-mobile-trigger aria-label="Abrir menú">
+					<span class="nav-mobile-toggle-box" aria-hidden="true">
+						<span></span>
+						<span></span>
+						<span></span>
+					</span>
+					<span class="sr-only">Abrir menú</span>
+				</button>
+			</div>
+		</div>
+	</nav>
+
+	<div class="mobile-drawer" hidden data-nav-drawer>
+		<div class="mobile-drawer-backdrop" data-nav-drawer-dismiss></div>
+		<div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+			<header class="drawer-header">
+				<h2 class="drawer-title" id="drawerTitle">Herramientas</h2>
+				<button class="drawer-close" type="button" data-nav-drawer-dismiss aria-label="Cerrar menú">×</button>
+			</header>
+			<div class="drawer-content" data-nav-drawer-content></div>
+		</div>
+	</div>
+
+	<div class="search-overlay" hidden data-nav-search>
+		<div class="search-overlay-backdrop" data-nav-search-dismiss></div>
+		<div class="search-overlay-panel" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+			<header class="search-overlay-header">
+				<h2 class="search-overlay-title" id="searchTitle">Buscar herramienta</h2>
+				<button class="search-overlay-close" type="button" data-nav-search-dismiss aria-label="Cerrar búsqueda">×</button>
+			</header>
+			<div class="search-input-wrapper">
+				<input type="search" class="search-input" placeholder="Escribe para filtrar herramientas" data-nav-search-input aria-label="Buscar herramienta" />
+			</div>
+			<div class="search-results" data-nav-search-results>
+				<p class="search-result-empty">Empieza a escribir para ver resultados.</p>
+			</div>
+			<p class="search-hint">Pulsa Esc para cerrar.</p>
+		</div>
+	</div>
+
+	<div class="background"></div>
+
+	<div class="container">
+		<header class="header">
+			<h1 class="title">Reform Audio</h1>
+			<p class="subtitle">Experimentos rápidos con audio (compresión, recorte, normalización)</p>
+		</header>
+
+		<main class="main">
+			<div class="dropzone" id="dropzone">
+				<div class="dropzone-content">
+					<svg class="icon-upload" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M9 18V5a3 3 0 0 1 6 0v13"/>
+						<path d="M5 10v2a7 7 0 0 0 14 0v-2"/>
+					</svg>
+					<p class="dropzone-text">Arrastra audios aquí o haz clic para seleccionar</p>
+					<p class="dropzone-hint">MP3, WAV, M4A, OGG</p>
+				</div>
+				<input type="file" id="fileInput" multiple accept=".mp3,.wav,.m4a,.ogg,audio/*" hidden>
+			</div>
+
+			<!-- Selector de formato y bitrate -->
+			<section class="format-selector" id="formatSelector" style="display:none;">
+				<div class="format-header">
+					<h3>Elige formato de salida</h3>
+					<div class="quality-control" id="bitrateControl">
+						<label for="bitrateSlider">Bitrate:</label>
+						<input type="range" id="bitrateSlider" min="64" max="320" step="16" value="128" />
+						<span id="bitrateValue">128 kbps</span>
+					</div>
+				</div>
+
+				<div class="format-grid">
+					<button class="format-btn" data-format="mp3" type="button">
+						<strong>MP3</strong>
+						<span>Alta compatibilidad</span>
+					</button>
+					<button class="format-btn" data-format="m4a" type="button">
+						<strong>M4A</strong>
+						<span>Calidad/espacio equilibrado</span>
+					</button>
+					<button class="format-btn" data-format="aac" type="button">
+						<strong>AAC</strong>
+						<span>Flujo AAC crudo ADTS</span>
+					</button>
+					<button class="format-btn" data-format="ogg" type="button">
+						<strong>OGG</strong>
+						<span>Vorbis con pérdida</span>
+					</button>
+					<button class="format-btn" data-format="opus" type="button">
+						<strong>OPUS</strong>
+						<span>Opus en OGG</span>
+					</button>
+					<button class="format-btn" data-format="wav" type="button">
+						<strong>WAV</strong>
+						<span>Sin pérdida</span>
+					</button>
+					<button class="format-btn" data-format="flac" type="button">
+						<strong>FLAC</strong>
+						<span>Sin pérdida</span>
+					</button>
+				</div>
+			</section>
+
+			<div class="files-container" id="filesContainer"></div>
+
+			<button class="btn-convert" id="audioBtn" disabled>
+				<span>Procesar audio</span>
+			</button>
+		</main>
+
+		<footer class="footer">
+			<p>Reform Audio usa FFmpeg</p>
+		</footer>
+	</div>
+
+	<div class="toast-container" id="toastContainer"></div>
+
+	<script type="module" src="navigation.js"></script>
+	<script type="module" src="reform-audio.js"></script>
+</body>
+</html>
+

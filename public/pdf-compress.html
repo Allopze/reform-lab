@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>PDF Compress - Reform Lab</title>
+	<link rel="stylesheet" href="styles.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+	<nav class="navbar" data-nav>
+		<div class="navbar-container">
+			<a href="index.html" class="navbar-brand" data-nav-home>
+				<img src="assets/reform-lab-logo-dark.svg" alt="Reform Lab" class="brand-logo brand-logo-theme-dark" height="32" decoding="async" />
+				<img src="assets/reform-lab-logo-light.svg" alt="" class="brand-logo brand-logo-theme-light" aria-hidden="true" height="32" decoding="async" />
+				<span class="brand-text">Reform Lab</span>
+			</a>
+
+			<div class="navbar-links">
+				<ul class="nav-categories" data-nav-categories></ul>
+			</div>
+
+			<div class="navbar-actions">
+				<button class="nav-search-action" type="button" data-nav-search-trigger>
+					<span class="nav-search-icon" aria-hidden="true"></span>
+					<span>Buscar</span>
+					<span class="nav-search-shortcut">Ctrl + K</span>
+				</button>
+				<button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
+					<span class="theme-icon sun" aria-hidden="true"></span>
+					<span class="theme-icon moon" aria-hidden="true"></span>
+				</button>
+				<button class="nav-mobile-toggle" type="button" data-nav-mobile-trigger aria-label="Abrir menú">
+					<span class="nav-mobile-toggle-box" aria-hidden="true">
+						<span></span>
+						<span></span>
+						<span></span>
+					</span>
+					<span class="sr-only">Abrir menú</span>
+				</button>
+			</div>
+		</div>
+	</nav>
+
+	<div class="mobile-drawer" hidden data-nav-drawer>
+		<div class="mobile-drawer-backdrop" data-nav-drawer-dismiss></div>
+		<div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+			<header class="drawer-header">
+				<h2 class="drawer-title" id="drawerTitle">Herramientas</h2>
+				<button class="drawer-close" type="button" data-nav-drawer-dismiss aria-label="Cerrar menú">×</button>
+			</header>
+			<div class="drawer-content" data-nav-drawer-content></div>
+		</div>
+	</div>
+
+	<div class="search-overlay" hidden data-nav-search>
+		<div class="search-overlay-backdrop" data-nav-search-dismiss></div>
+		<div class="search-overlay-panel" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+			<header class="search-overlay-header">
+				<h2 class="search-overlay-title" id="searchTitle">Buscar herramienta</h2>
+				<button class="search-overlay-close" type="button" data-nav-search-dismiss aria-label="Cerrar búsqueda">×</button>
+			</header>
+			<div class="search-input-wrapper">
+				<input type="search" class="search-input" placeholder="Escribe para filtrar herramientas" data-nav-search-input aria-label="Buscar herramienta" />
+			</div>
+			<div class="search-results" data-nav-search-results>
+				<p class="search-result-empty">Empieza a escribir para ver resultados.</p>
+			</div>
+			<p class="search-hint">Pulsa Esc para cerrar.</p>
+		</div>
+	</div>
+
+	<div class="background"></div>
+
+	<div class="container">
+		<header class="header">
+			<h1 class="title">PDF Compress</h1>
+			<p class="subtitle">Reduce el tamaño de tus PDFs sin sacrificar claridad</p>
+		</header>
+
+		<main class="main">
+			<div class="dropzone" id="dropzone">
+				<div class="dropzone-content">
+					<svg class="icon-upload" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+						<polyline points="17 8 12 3 7 8"></polyline>
+						<line x1="12" y1="3" x2="12" y2="15"></line>
+					</svg>
+					<p class="dropzone-text">Arrastra PDFs aquí o haz clic para seleccionar</p>
+					<p class="dropzone-hint">Acepta PDF hasta 100&nbsp;MB</p>
+				</div>
+				<input type="file" id="fileInput" accept=".pdf,application/pdf" hidden>
+			</div>
+
+			<section class="compression-controls" id="compressionControls">
+				<div class="compression-header">
+					<h2>Ajusta el nivel de compresión</h2>
+					<p>Selecciona el equilibrio óptimo entre peso final y calidad visual.</p>
+				</div>
+				<div class="quality-options">
+					<button class="quality-option active" type="button" data-compression="balanced">
+						<span class="quality-title">Equilibrado</span>
+						<span class="quality-desc">Reducido 40% aprox. ideal para compartir.</span>
+					</button>
+					<button class="quality-option" type="button" data-compression="strong">
+						<span class="quality-title">Ligero</span>
+						<span class="quality-desc">Tamaño mínimo con calidad aceptable.</span>
+					</button>
+					<button class="quality-option" type="button" data-compression="high">
+						<span class="quality-title">Alta calidad</span>
+						<span class="quality-desc">Menos compresión, mantiene mayor nitidez.</span>
+					</button>
+				</div>
+			</section>
+
+			<section class="compression-summary" id="compressionSummary" hidden>
+				<div class="summary-header">
+					<h2>Resumen de compresión</h2>
+					<p>Compara el archivo original con la versión optimizada.</p>
+				</div>
+				<div class="summary-grid">
+					<div class="summary-item">
+						<span class="summary-label">Tamaño original</span>
+						<span class="summary-value" data-summary-original>—</span>
+					</div>
+					<div class="summary-item">
+						<span class="summary-label">Tamaño comprimido</span>
+						<span class="summary-value" data-summary-compressed>—</span>
+					</div>
+					<div class="summary-item">
+						<span class="summary-label">Ahorro estimado</span>
+						<span class="summary-value" data-summary-savings>—</span>
+					</div>
+				</div>
+				<div class="summary-progress">
+					<div class="progress-bar">
+						<div class="progress-fill" data-summary-progress style="width: 0%"></div>
+					</div>
+					<span class="ratio-label" data-summary-ratio>—</span>
+				</div>
+				<button class="btn-download-result" type="button" id="downloadBtn" hidden>Descargar PDF comprimido</button>
+			</section>
+
+			<button class="btn-convert" id="compressBtn" disabled>
+				<span>Comprimir PDF</span>
+			</button>
+		</main>
+
+		<footer class="footer">
+			<p>Optimización impulsada por Ghostscript</p>
+		</footer>
+	</div>
+
+	<div class="toast-container" id="toastContainer"></div>
+
+	<script type="module" src="navigation.js"></script>
+	<script type="module" src="pdf-compress.js"></script>
+</body>
+</html>

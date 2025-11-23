@@ -58,19 +58,76 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	if (compressBtn) {
-		compressBtn.addEventListener('click', () => {
+		compressBtn.addEventListener('click', async () => {
 			if (!selectedFile) {
 				showToast('Selecciona un PDF para comenzar.', 'warning', toastContainer);
 				return;
 			}
 
-			showToast('La compresión automática estará disponible pronto.', 'info', toastContainer);
+			try {
+				compressBtn.disabled = true;
+				compressBtn.innerHTML = '<span>Comprimiendo...</span>';
+
+				const formData = new FormData();
+				formData.append('file', selectedFile);
+				formData.append('preset', selectedPreset);
+
+				const response = await fetch('/compress-pdf', {
+					method: 'POST',
+					body: formData
+				});
+
+				if (!response.ok) {
+					const error = await response.json();
+					throw new Error(error.message || 'Error al comprimir PDF');
+				}
+
+				const result = await response.json();
+
+				// Actualizar resumen con datos reales
+				if (summaryOriginal) {
+					summaryOriginal.textContent = formatBytes(result.originalSize);
+				}
+				if (summaryCompressed) {
+					summaryCompressed.textContent = formatBytes(result.compressedSize);
+				}
+				if (summarySavings) {
+					summarySavings.textContent = `${formatBytes(result.savings)} (${result.savingsPercent}%)`;
+				}
+				if (summaryProgress) {
+					summaryProgress.style.width = `${result.savingsPercent}%`;
+				}
+				if (summaryRatio) {
+					summaryRatio.textContent = `Ahorro real ${result.savingsPercent}%`;
+				}
+
+				// Mostrar botón de descarga
+				if (downloadBtn) {
+					downloadBtn.hidden = false;
+					downloadBtn.onclick = () => {
+						const link = document.createElement('a');
+						link.href = result.downloadUrl;
+						link.download = result.outputName;
+						link.click();
+						showToast('PDF comprimido descargado', 'success', toastContainer);
+					};
+				}
+
+				showToast(`PDF comprimido exitosamente (${result.savingsPercent}% más pequeño)`, 'success', toastContainer);
+
+			} catch (error) {
+				console.error('Error:', error);
+				showToast(error.message || 'Error al comprimir el PDF', 'error', toastContainer);
+			} finally {
+				compressBtn.disabled = false;
+				compressBtn.innerHTML = '<span>Comprimir PDF</span>';
+			}
 		});
 	}
 
 	if (downloadBtn) {
 		downloadBtn.addEventListener('click', () => {
-			showToast('La descarga estará disponible cuando la compresión esté lista.', 'info', toastContainer);
+			// El click handler se configura dinámicamente después de comprimir
 		});
 	}
 

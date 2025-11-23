@@ -1,5 +1,4 @@
-version: '3.8'
-
+# yaml-language-server: $schema=https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json
 services:
   simplepdf:
     build:

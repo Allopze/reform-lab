@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { Blob } = require('buffer');
-const { exec } = require('child_process');
+const { exec, execSync } = require('child_process');
 const sharp = require('sharp');
 const pngToIco = require('png-to-ico');
 const bmp = require('bmp-js');
@@ -481,6 +481,37 @@ function findLibreOffice() {
 }
 
 const SOFFICE_PATH = findLibreOffice();
+
+// --- DETECCIÓN DE GHOSTSCRIPT ---
+function findGhostscript() {
+  if (process.env.GHOSTSCRIPT_PATH && fs.existsSync(process.env.GHOSTSCRIPT_PATH)) {
+    return process.env.GHOSTSCRIPT_PATH;
+  }
+  const possiblePaths = process.platform === 'win32'
+    ? [
+        'gswin64c.exe',
+        'gswin32c.exe',
+        'C:\\Program Files\\gs\\gs10.04.0\\bin\\gswin64c.exe',
+        'C:\\Program Files\\gs\\gs10.03.1\\bin\\gswin64c.exe',
+        'C:\\Program Files\\gs\\gs10.02.1\\bin\\gswin64c.exe',
+        'C:\\Program Files (x86)\\gs\\gs10.04.0\\bin\\gswin32c.exe',
+        'C:\\Program Files (x86)\\gs\\gs10.03.1\\bin\\gswin32c.exe'
+      ]
+    : ['gs', '/usr/bin/gs', '/usr/local/bin/gs'];
+  
+  for (const gsPath of possiblePaths) {
+    try {
+      // Try to execute --version to verify it works
+      execSync(`"${gsPath}" --version`, { stdio: 'ignore', timeout: 3000 });
+      return gsPath;
+    } catch (err) {
+      // Continue to next path
+    }
+  }
+  return null;
+}
+
+const GHOSTSCRIPT_PATH = findGhostscript();
 
 function convertToPDF(inputPath, outputDir) {
   return new Promise((resolve, reject) => {
@@ -1228,6 +1259,82 @@ app.post('/pdf-to-office', uploadPdf.array('files', MAX_FILES), async (req, res)
   }
 });
 
+// 5. Endpoint para comprimir PDF con Ghostscript
+app.post('/compress-pdf', uploadPdf.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No se recibió ningún archivo PDF' });
+    }
+    if (!GHOSTSCRIPT_PATH) {
+      return res.status(500).json({ 
+        message: 'Ghostscript no está instalado o no se detectó. La compresión de PDF no está disponible.' 
+      });
+    }
+
+    const preset = req.body.preset || 'balanced';
+    const jobId = req.jobId;
+    const outputDir = path.join(TMP_DIR, jobId, 'out');
+    fs.mkdirSync(outputDir, { recursive: true });
+
+    const inputPath = req.file.path;
+    const baseName = sanitizeFilename(path.parse(req.file.originalname).name);
+    const outputName = `${baseName}_compressed.pdf`;
+    const outputPath = path.join(outputDir, outputName);
+
+    // Configuración de Ghostscript según el preset
+    const gsSettings = {
+      high: { dPDFSETTINGS: '/printer', quality: 'Alta calidad' },
+      balanced: { dPDFSETTINGS: '/ebook', quality: 'Equilibrado' },
+      strong: { dPDFSETTINGS: '/screen', quality: 'Máxima compresión' }
+    };
+
+    const settings = gsSettings[preset] || gsSettings.balanced;
+
+    // Comando de Ghostscript
+    const gsCommand = `"${GHOSTSCRIPT_PATH}" -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=${settings.dPDFSETTINGS} -dNOPAUSE -dQUIET -dBATCH -sOutputFile="${outputPath}" "${inputPath}"`;
+
+    console.log(`Comprimiendo PDF con preset '${preset}' (${settings.quality})...`);
+
+    await new Promise((resolve, reject) => {
+      exec(gsCommand, { timeout: 120000 }, (error, stdout, stderr) => {
+        if (error) {
+          console.error('Ghostscript error:', stderr?.trim() || error.message);
+          return reject(new Error(`Error al comprimir PDF: ${stderr?.trim() || error.message}`));
+        }
+        resolve();
+      });
+    });
+
+    // Verificar que el archivo comprimido existe
+    if (!fs.existsSync(outputPath)) {
+      throw new Error('El PDF comprimido no fue generado');
+    }
+
+    // Obtener tamaños para estadísticas
+    const originalSize = fs.statSync(inputPath).size;
+    const compressedSize = fs.statSync(outputPath).size;
+    const savings = Math.max(0, originalSize - compressedSize);
+    const savingsPercent = originalSize > 0 ? Math.round((savings / originalSize) * 100) : 0;
+
+    console.log(`Compresión exitosa: ${formatBytes(originalSize)} → ${formatBytes(compressedSize)} (${savingsPercent}% ahorro)`);
+
+    res.json({
+      status: 'success',
+      originalName: req.file.originalname,
+      outputName,
+      downloadUrl: `/download/${jobId}/${outputName}`,
+      preset,
+      originalSize,
+      compressedSize,
+      savings,
+      savingsPercent
+    });
+  } catch (error) {
+    console.error('Error al comprimir PDF:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // ======================================================
 // --- ARCHIVO: Comprimir en ZIP ---
 // ======================================================
@@ -1580,4 +1687,5 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`\nServidor corriendo en http://localhost:${PORT}`);
   console.log(`LibreOffice: ${SOFFICE_PATH || 'NO DETECTADO'}`);
+  console.log(`Ghostscript: ${GHOSTSCRIPT_PATH || 'NO DETECTADO'}`);
 });
